@@ -1,23 +1,24 @@
-import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
-import { Toaster } from "sonner";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+
 import appCss from "../styles.css?url";
-import { AuthProvider } from "@/lib/auth";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <p className="font-mono text-xs text-primary">ERROR_404</p>
-        <h1 className="mt-2 text-7xl font-bold text-foreground">Not found</h1>
-        <p className="mt-4 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist.
+        <h1 className="text-7xl font-bold text-foreground">404</h1>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has been moved.
         </p>
-        <a
-          href="/"
-          className="mt-6 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-        >
-          Go home
-        </a>
+        <div className="mt-6">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Go home
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -27,20 +28,25 @@ export const Route = createRootRoute({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { name: "theme-color", content: "#0c1218" },
-      { title: "WAGate — WhatsApp OTP & Messaging API for developers" },
-      { name: "description", content: "Send WhatsApp OTPs and messages from your backend in 60 seconds. Connect a number, get an API key, ship." },
-      { property: "og:title", content: "WAGate — WhatsApp API for developers" },
-      { property: "og:description", content: "Drop-in WhatsApp OTP and messaging API. Bring your own number." },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "WaGate" },
+      { name: "description", content: "WhatsApp Connect Hub enables developers to integrate WhatsApp messaging and OTP delivery into their applications." },
+      { name: "author", content: "Lovable" },
+      { property: "og:title", content: "WaGate" },
+      { property: "og:description", content: "WhatsApp Connect Hub enables developers to integrate WhatsApp messaging and OTP delivery into their applications." },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:card", content: "summary" },
+      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "WaGate" },
+      { name: "twitter:description", content: "WhatsApp Connect Hub enables developers to integrate WhatsApp messaging and OTP delivery into their applications." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/374b5a3b-1a07-4f22-ac5c-759e351c7118/id-preview-c20d0c14--68cc726e-9046-484c-991a-3da7243776f8.lovable.app-1776527761285.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/374b5a3b-1a07-4f22-ac5c-759e351c7118/id-preview-c20d0c14--68cc726e-9046-484c-991a-3da7243776f8.lovable.app-1776527761285.png" },
     ],
     links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "icon", href: "/icon-192.png", type: "image/png" },
-      { rel: "apple-touch-icon", href: "/icon-192.png" },
+      {
+        rel: "stylesheet",
+        href: appCss,
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -50,7 +56,7 @@ export const Route = createRootRoute({
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -63,10 +69,5 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return (
-    <AuthProvider>
-      <Outlet />
-      <Toaster theme="dark" position="top-right" richColors />
-    </AuthProvider>
-  );
+  return <Outlet />;
 }
