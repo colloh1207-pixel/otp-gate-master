@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as V1StatusRouteImport } from './routes/v1.status'
 import { Route as V1SendRouteImport } from './routes/v1.send'
@@ -16,6 +18,16 @@ import { Route as V1OtpRouteImport } from './routes/v1.otp'
 import { Route as V1BulkRouteImport } from './routes/v1.bulk'
 import { Route as V1WebhookSessionIdRouteImport } from './routes/v1.webhook.$sessionId'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -49,6 +61,8 @@ const V1WebhookSessionIdRoute = V1WebhookSessionIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/v1/bulk': typeof V1BulkRoute
   '/v1/otp': typeof V1OtpRoute
   '/v1/send': typeof V1SendRoute
@@ -57,6 +71,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/v1/bulk': typeof V1BulkRoute
   '/v1/otp': typeof V1OtpRoute
   '/v1/send': typeof V1SendRoute
@@ -66,6 +82,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/v1/bulk': typeof V1BulkRoute
   '/v1/otp': typeof V1OtpRoute
   '/v1/send': typeof V1SendRoute
@@ -76,6 +94,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
+    | '/signup'
     | '/v1/bulk'
     | '/v1/otp'
     | '/v1/send'
@@ -84,6 +104,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
+    | '/signup'
     | '/v1/bulk'
     | '/v1/otp'
     | '/v1/send'
@@ -92,6 +114,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/login'
+    | '/signup'
     | '/v1/bulk'
     | '/v1/otp'
     | '/v1/send'
@@ -101,6 +125,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   V1BulkRoute: typeof V1BulkRoute
   V1OtpRoute: typeof V1OtpRoute
   V1SendRoute: typeof V1SendRoute
@@ -110,6 +136,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -157,6 +197,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   V1BulkRoute: V1BulkRoute,
   V1OtpRoute: V1OtpRoute,
   V1SendRoute: V1SendRoute,
