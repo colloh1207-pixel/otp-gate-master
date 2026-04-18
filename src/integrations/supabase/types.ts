@@ -14,10 +14,328 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_hash: string
+          key_prefix: string
+          label: string
+          last_used_at: string | null
+          revoked_at: string | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_hash: string
+          key_prefix: string
+          label: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_hash?: string
+          key_prefix?: string
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_logs: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          direction: string
+          duration_ms: number | null
+          error: string | null
+          id: string
+          recipient: string | null
+          request_body: Json | null
+          response_body: Json | null
+          session_id: string | null
+          status_code: number | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          direction?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          recipient?: string | null
+          request_body?: Json | null
+          response_body?: Json | null
+          session_id?: string | null
+          status_code?: number | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          direction?: string
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          recipient?: string | null
+          request_body?: Json | null
+          response_body?: Json | null
+          session_id?: string | null
+          status_code?: number | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_logs_api_key_id_fkey"
+            columns: ["api_key_id"]
+            isOneToOne: false
+            referencedRelation: "api_keys_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_logs_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions: {
+        Row: {
+          created_at: string
+          id: string
+          last_connected_at: string | null
+          name: string
+          phone_number: string | null
+          status: string
+          updated_at: string
+          upstream_session_id: string | null
+          upstream_token: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          name: string
+          phone_number?: string | null
+          status?: string
+          updated_at?: string
+          upstream_session_id?: string | null
+          upstream_token?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_connected_at?: string | null
+          name?: string
+          phone_number?: string | null
+          status?: string
+          updated_at?: string
+          upstream_session_id?: string | null
+          upstream_token?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      templates: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+          variables: Json
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+          variables?: Json
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+          variables?: Json
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          event_type: string
+          id: string
+          payload: Json | null
+          received_at: string
+          session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          event_type: string
+          id?: string
+          payload?: Json | null
+          received_at?: string
+          session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          event_type?: string
+          id?: string
+          payload?: Json | null
+          received_at?: string
+          session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_events_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      api_keys_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          key_prefix: string | null
+          label: string | null
+          last_used_at: string | null
+          revoked_at: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          key_prefix?: string | null
+          label?: string | null
+          last_used_at?: string | null
+          revoked_at?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          key_prefix?: string | null
+          label?: string | null
+          last_used_at?: string | null
+          revoked_at?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_keys_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "api_keys_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "sessions_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sessions_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          last_connected_at: string | null
+          name: string | null
+          phone_number: string | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          last_connected_at?: string | null
+          name?: string | null
+          phone_number?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          last_connected_at?: string | null
+          name?: string | null
+          phone_number?: string | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
