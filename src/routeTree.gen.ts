@@ -13,11 +13,18 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as V1StatusRouteImport } from './routes/v1.status'
 import { Route as V1SendRouteImport } from './routes/v1.send'
 import { Route as V1OtpRouteImport } from './routes/v1.otp'
 import { Route as V1BulkRouteImport } from './routes/v1.bulk'
+import { Route as DashboardTemplatesRouteImport } from './routes/dashboard.templates'
+import { Route as DashboardSessionsRouteImport } from './routes/dashboard.sessions'
+import { Route as DashboardPlaygroundRouteImport } from './routes/dashboard.playground'
+import { Route as DashboardHistoryRouteImport } from './routes/dashboard.history'
+import { Route as DashboardDocsRouteImport } from './routes/dashboard.docs'
 import { Route as V1WebhookSessionIdRouteImport } from './routes/v1.webhook.$sessionId'
+import { Route as DashboardSessionsIdRouteImport } from './routes/dashboard.sessions.$id'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -39,6 +46,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const V1StatusRoute = V1StatusRouteImport.update({
   id: '/v1/status',
   path: '/v1/status',
@@ -59,44 +71,94 @@ const V1BulkRoute = V1BulkRouteImport.update({
   path: '/v1/bulk',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardTemplatesRoute = DashboardTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSessionsRoute = DashboardSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPlaygroundRoute = DashboardPlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardHistoryRoute = DashboardHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardDocsRoute = DashboardDocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const V1WebhookSessionIdRoute = V1WebhookSessionIdRouteImport.update({
   id: '/v1/webhook/$sessionId',
   path: '/v1/webhook/$sessionId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardSessionsIdRoute = DashboardSessionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => DashboardSessionsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/dashboard/docs': typeof DashboardDocsRoute
+  '/dashboard/history': typeof DashboardHistoryRoute
+  '/dashboard/playground': typeof DashboardPlaygroundRoute
+  '/dashboard/sessions': typeof DashboardSessionsRouteWithChildren
+  '/dashboard/templates': typeof DashboardTemplatesRoute
   '/v1/bulk': typeof V1BulkRoute
   '/v1/otp': typeof V1OtpRoute
   '/v1/send': typeof V1SendRoute
   '/v1/status': typeof V1StatusRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/sessions/$id': typeof DashboardSessionsIdRoute
   '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/dashboard/docs': typeof DashboardDocsRoute
+  '/dashboard/history': typeof DashboardHistoryRoute
+  '/dashboard/playground': typeof DashboardPlaygroundRoute
+  '/dashboard/sessions': typeof DashboardSessionsRouteWithChildren
+  '/dashboard/templates': typeof DashboardTemplatesRoute
   '/v1/bulk': typeof V1BulkRoute
   '/v1/otp': typeof V1OtpRoute
   '/v1/send': typeof V1SendRoute
   '/v1/status': typeof V1StatusRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/sessions/$id': typeof DashboardSessionsIdRoute
   '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/dashboard/docs': typeof DashboardDocsRoute
+  '/dashboard/history': typeof DashboardHistoryRoute
+  '/dashboard/playground': typeof DashboardPlaygroundRoute
+  '/dashboard/sessions': typeof DashboardSessionsRouteWithChildren
+  '/dashboard/templates': typeof DashboardTemplatesRoute
   '/v1/bulk': typeof V1BulkRoute
   '/v1/otp': typeof V1OtpRoute
   '/v1/send': typeof V1SendRoute
   '/v1/status': typeof V1StatusRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/sessions/$id': typeof DashboardSessionsIdRoute
   '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRouteTypes {
@@ -106,21 +168,34 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/signup'
+    | '/dashboard/docs'
+    | '/dashboard/history'
+    | '/dashboard/playground'
+    | '/dashboard/sessions'
+    | '/dashboard/templates'
     | '/v1/bulk'
     | '/v1/otp'
     | '/v1/send'
     | '/v1/status'
+    | '/dashboard/'
+    | '/dashboard/sessions/$id'
     | '/v1/webhook/$sessionId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard'
     | '/login'
     | '/signup'
+    | '/dashboard/docs'
+    | '/dashboard/history'
+    | '/dashboard/playground'
+    | '/dashboard/sessions'
+    | '/dashboard/templates'
     | '/v1/bulk'
     | '/v1/otp'
     | '/v1/send'
     | '/v1/status'
+    | '/dashboard'
+    | '/dashboard/sessions/$id'
     | '/v1/webhook/$sessionId'
   id:
     | '__root__'
@@ -128,16 +203,23 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/signup'
+    | '/dashboard/docs'
+    | '/dashboard/history'
+    | '/dashboard/playground'
+    | '/dashboard/sessions'
+    | '/dashboard/templates'
     | '/v1/bulk'
     | '/v1/otp'
     | '/v1/send'
     | '/v1/status'
+    | '/dashboard/'
+    | '/dashboard/sessions/$id'
     | '/v1/webhook/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   V1BulkRoute: typeof V1BulkRoute
@@ -177,6 +259,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/v1/status': {
       id: '/v1/status'
       path: '/v1/status'
@@ -205,6 +294,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V1BulkRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/templates': {
+      id: '/dashboard/templates'
+      path: '/templates'
+      fullPath: '/dashboard/templates'
+      preLoaderRoute: typeof DashboardTemplatesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/sessions': {
+      id: '/dashboard/sessions'
+      path: '/sessions'
+      fullPath: '/dashboard/sessions'
+      preLoaderRoute: typeof DashboardSessionsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/playground': {
+      id: '/dashboard/playground'
+      path: '/playground'
+      fullPath: '/dashboard/playground'
+      preLoaderRoute: typeof DashboardPlaygroundRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/history': {
+      id: '/dashboard/history'
+      path: '/history'
+      fullPath: '/dashboard/history'
+      preLoaderRoute: typeof DashboardHistoryRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/docs': {
+      id: '/dashboard/docs'
+      path: '/docs'
+      fullPath: '/dashboard/docs'
+      preLoaderRoute: typeof DashboardDocsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/v1/webhook/$sessionId': {
       id: '/v1/webhook/$sessionId'
       path: '/v1/webhook/$sessionId'
@@ -212,12 +336,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof V1WebhookSessionIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/sessions/$id': {
+      id: '/dashboard/sessions/$id'
+      path: '/$id'
+      fullPath: '/dashboard/sessions/$id'
+      preLoaderRoute: typeof DashboardSessionsIdRouteImport
+      parentRoute: typeof DashboardSessionsRoute
+    }
   }
 }
 
+interface DashboardSessionsRouteChildren {
+  DashboardSessionsIdRoute: typeof DashboardSessionsIdRoute
+}
+
+const DashboardSessionsRouteChildren: DashboardSessionsRouteChildren = {
+  DashboardSessionsIdRoute: DashboardSessionsIdRoute,
+}
+
+const DashboardSessionsRouteWithChildren =
+  DashboardSessionsRoute._addFileChildren(DashboardSessionsRouteChildren)
+
+interface DashboardRouteChildren {
+  DashboardDocsRoute: typeof DashboardDocsRoute
+  DashboardHistoryRoute: typeof DashboardHistoryRoute
+  DashboardPlaygroundRoute: typeof DashboardPlaygroundRoute
+  DashboardSessionsRoute: typeof DashboardSessionsRouteWithChildren
+  DashboardTemplatesRoute: typeof DashboardTemplatesRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardDocsRoute: DashboardDocsRoute,
+  DashboardHistoryRoute: DashboardHistoryRoute,
+  DashboardPlaygroundRoute: DashboardPlaygroundRoute,
+  DashboardSessionsRoute: DashboardSessionsRouteWithChildren,
+  DashboardTemplatesRoute: DashboardTemplatesRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   V1BulkRoute: V1BulkRoute,
@@ -229,3 +393,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
