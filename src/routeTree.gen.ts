@@ -9,38 +9,249 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
+import { Route as V1StatusRouteImport } from './routes/v1.status'
+import { Route as V1SendRouteImport } from './routes/v1.send'
+import { Route as V1OtpRouteImport } from './routes/v1.otp'
+import { Route as V1BulkRouteImport } from './routes/v1.bulk'
+import { Route as DashboardTemplatesRouteImport } from './routes/dashboard.templates'
+import { Route as DashboardSessionsRouteImport } from './routes/dashboard.sessions'
+import { Route as DashboardPlaygroundRouteImport } from './routes/dashboard.playground'
+import { Route as DashboardHistoryRouteImport } from './routes/dashboard.history'
+import { Route as DashboardDocsRouteImport } from './routes/dashboard.docs'
+import { Route as V1WebhookSessionIdRouteImport } from './routes/v1.webhook.$sessionId'
+import { Route as DashboardSessionsIdRouteImport } from './routes/dashboard.sessions.$id'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const V1StatusRoute = V1StatusRouteImport.update({
+  id: '/v1/status',
+  path: '/v1/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1SendRoute = V1SendRouteImport.update({
+  id: '/v1/send',
+  path: '/v1/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1OtpRoute = V1OtpRouteImport.update({
+  id: '/v1/otp',
+  path: '/v1/otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1BulkRoute = V1BulkRouteImport.update({
+  id: '/v1/bulk',
+  path: '/v1/bulk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardTemplatesRoute = DashboardTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSessionsRoute = DashboardSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardPlaygroundRoute = DashboardPlaygroundRouteImport.update({
+  id: '/playground',
+  path: '/playground',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardHistoryRoute = DashboardHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardDocsRoute = DashboardDocsRouteImport.update({
+  id: '/docs',
+  path: '/docs',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const V1WebhookSessionIdRoute = V1WebhookSessionIdRouteImport.update({
+  id: '/v1/webhook/$sessionId',
+  path: '/v1/webhook/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardSessionsIdRoute = DashboardSessionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => DashboardSessionsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/dashboard/docs': typeof DashboardDocsRoute
+  '/dashboard/history': typeof DashboardHistoryRoute
+  '/dashboard/playground': typeof DashboardPlaygroundRoute
+  '/dashboard/sessions': typeof DashboardSessionsRouteWithChildren
+  '/dashboard/templates': typeof DashboardTemplatesRoute
+  '/v1/bulk': typeof V1BulkRoute
+  '/v1/otp': typeof V1OtpRoute
+  '/v1/send': typeof V1SendRoute
+  '/v1/status': typeof V1StatusRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/sessions/$id': typeof DashboardSessionsIdRoute
+  '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/dashboard/docs': typeof DashboardDocsRoute
+  '/dashboard/history': typeof DashboardHistoryRoute
+  '/dashboard/playground': typeof DashboardPlaygroundRoute
+  '/dashboard/sessions': typeof DashboardSessionsRouteWithChildren
+  '/dashboard/templates': typeof DashboardTemplatesRoute
+  '/v1/bulk': typeof V1BulkRoute
+  '/v1/otp': typeof V1OtpRoute
+  '/v1/send': typeof V1SendRoute
+  '/v1/status': typeof V1StatusRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/sessions/$id': typeof DashboardSessionsIdRoute
+  '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/dashboard/docs': typeof DashboardDocsRoute
+  '/dashboard/history': typeof DashboardHistoryRoute
+  '/dashboard/playground': typeof DashboardPlaygroundRoute
+  '/dashboard/sessions': typeof DashboardSessionsRouteWithChildren
+  '/dashboard/templates': typeof DashboardTemplatesRoute
+  '/v1/bulk': typeof V1BulkRoute
+  '/v1/otp': typeof V1OtpRoute
+  '/v1/send': typeof V1SendRoute
+  '/v1/status': typeof V1StatusRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/sessions/$id': typeof DashboardSessionsIdRoute
+  '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/signup'
+    | '/dashboard/docs'
+    | '/dashboard/history'
+    | '/dashboard/playground'
+    | '/dashboard/sessions'
+    | '/dashboard/templates'
+    | '/v1/bulk'
+    | '/v1/otp'
+    | '/v1/send'
+    | '/v1/status'
+    | '/dashboard/'
+    | '/dashboard/sessions/$id'
+    | '/v1/webhook/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/dashboard/docs'
+    | '/dashboard/history'
+    | '/dashboard/playground'
+    | '/dashboard/sessions'
+    | '/dashboard/templates'
+    | '/v1/bulk'
+    | '/v1/otp'
+    | '/v1/send'
+    | '/v1/status'
+    | '/dashboard'
+    | '/dashboard/sessions/$id'
+    | '/v1/webhook/$sessionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/signup'
+    | '/dashboard/docs'
+    | '/dashboard/history'
+    | '/dashboard/playground'
+    | '/dashboard/sessions'
+    | '/dashboard/templates'
+    | '/v1/bulk'
+    | '/v1/otp'
+    | '/v1/send'
+    | '/v1/status'
+    | '/dashboard/'
+    | '/dashboard/sessions/$id'
+    | '/v1/webhook/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
+  V1BulkRoute: typeof V1BulkRoute
+  V1OtpRoute: typeof V1OtpRoute
+  V1SendRoute: typeof V1SendRoute
+  V1StatusRoute: typeof V1StatusRoute
+  V1WebhookSessionIdRoute: typeof V1WebhookSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +259,136 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/v1/status': {
+      id: '/v1/status'
+      path: '/v1/status'
+      fullPath: '/v1/status'
+      preLoaderRoute: typeof V1StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/send': {
+      id: '/v1/send'
+      path: '/v1/send'
+      fullPath: '/v1/send'
+      preLoaderRoute: typeof V1SendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/otp': {
+      id: '/v1/otp'
+      path: '/v1/otp'
+      fullPath: '/v1/otp'
+      preLoaderRoute: typeof V1OtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/bulk': {
+      id: '/v1/bulk'
+      path: '/v1/bulk'
+      fullPath: '/v1/bulk'
+      preLoaderRoute: typeof V1BulkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/templates': {
+      id: '/dashboard/templates'
+      path: '/templates'
+      fullPath: '/dashboard/templates'
+      preLoaderRoute: typeof DashboardTemplatesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/sessions': {
+      id: '/dashboard/sessions'
+      path: '/sessions'
+      fullPath: '/dashboard/sessions'
+      preLoaderRoute: typeof DashboardSessionsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/playground': {
+      id: '/dashboard/playground'
+      path: '/playground'
+      fullPath: '/dashboard/playground'
+      preLoaderRoute: typeof DashboardPlaygroundRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/history': {
+      id: '/dashboard/history'
+      path: '/history'
+      fullPath: '/dashboard/history'
+      preLoaderRoute: typeof DashboardHistoryRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/docs': {
+      id: '/dashboard/docs'
+      path: '/docs'
+      fullPath: '/dashboard/docs'
+      preLoaderRoute: typeof DashboardDocsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/v1/webhook/$sessionId': {
+      id: '/v1/webhook/$sessionId'
+      path: '/v1/webhook/$sessionId'
+      fullPath: '/v1/webhook/$sessionId'
+      preLoaderRoute: typeof V1WebhookSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/sessions/$id': {
+      id: '/dashboard/sessions/$id'
+      path: '/$id'
+      fullPath: '/dashboard/sessions/$id'
+      preLoaderRoute: typeof DashboardSessionsIdRouteImport
+      parentRoute: typeof DashboardSessionsRoute
+    }
   }
 }
 
+interface DashboardSessionsRouteChildren {
+  DashboardSessionsIdRoute: typeof DashboardSessionsIdRoute
+}
+
+const DashboardSessionsRouteChildren: DashboardSessionsRouteChildren = {
+  DashboardSessionsIdRoute: DashboardSessionsIdRoute,
+}
+
+const DashboardSessionsRouteWithChildren =
+  DashboardSessionsRoute._addFileChildren(DashboardSessionsRouteChildren)
+
+interface DashboardRouteChildren {
+  DashboardDocsRoute: typeof DashboardDocsRoute
+  DashboardHistoryRoute: typeof DashboardHistoryRoute
+  DashboardPlaygroundRoute: typeof DashboardPlaygroundRoute
+  DashboardSessionsRoute: typeof DashboardSessionsRouteWithChildren
+  DashboardTemplatesRoute: typeof DashboardTemplatesRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardDocsRoute: DashboardDocsRoute,
+  DashboardHistoryRoute: DashboardHistoryRoute,
+  DashboardPlaygroundRoute: DashboardPlaygroundRoute,
+  DashboardSessionsRoute: DashboardSessionsRouteWithChildren,
+  DashboardTemplatesRoute: DashboardTemplatesRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRoute: DashboardRouteWithChildren,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
+  V1BulkRoute: V1BulkRoute,
+  V1OtpRoute: V1OtpRoute,
+  V1SendRoute: V1SendRoute,
+  V1StatusRoute: V1StatusRoute,
+  V1WebhookSessionIdRoute: V1WebhookSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
