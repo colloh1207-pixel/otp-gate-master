@@ -385,23 +385,23 @@ export const playgroundCall = createServerFn({ method: "POST" })
 
     // Log it (without exposing token)
     const safeBody = { ...(data.body as Record<string, unknown>) };
-    await supabaseAdmin.from("message_logs").insert({
+    await supabaseAdmin.from("message_logs").insert([{
       user_id: context.userId,
       session_id: data.sessionId,
       direction: "outbound",
       type: `playground.${data.endpoint}`,
-      recipient: typeof safeBody?.to === "string" ? safeBody.to : null,
-      request_body: safeBody,
-      response_body: up.data as never,
+      recipient: typeof safeBody?.to === "string" ? (safeBody.to as string) : null,
+      request_body: safeBody as never,
+      response_body: (up.data ?? null) as never,
       status_code: up.status,
       duration_ms: Date.now() - start,
       error: up.error,
-    });
+    }]);
 
     return {
       status: up.status,
       ok: up.ok,
-      data: up.data,
+      data: JSON.parse(JSON.stringify(up.data ?? null)) as Record<string, unknown> | null,
       error: up.error,
       durationMs: up.durationMs,
     };
