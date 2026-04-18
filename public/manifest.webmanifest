@@ -1,0 +1,15 @@
+{
+  "name": "WAGate — WhatsApp API",
+  "short_name": "WAGate",
+  "description": "WhatsApp OTP & messaging API for developers",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c1218",
+  "theme_color": "#0c1218",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
