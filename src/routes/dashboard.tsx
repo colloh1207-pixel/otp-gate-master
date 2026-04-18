@@ -6,14 +6,15 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard")({ component: DashboardLayout });
 
-const nav = [
+type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+const nav: ReadonlyArray<NavItem> = [
   { to: "/dashboard", label: "Overview", icon: LayoutDashboard, exact: true },
   { to: "/dashboard/sessions", label: "Sessions", icon: Smartphone },
   { to: "/dashboard/playground", label: "Playground", icon: FlaskConical },
   { to: "/dashboard/history", label: "History", icon: History },
   { to: "/dashboard/templates", label: "Templates", icon: FileText },
   { to: "/dashboard/docs", label: "API Docs", icon: BookOpen },
-] as const;
+];
 
 function DashboardLayout() {
   const { session, loading, signOut, user } = useAuth();
