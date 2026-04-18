@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as V1StatusRouteImport } from './routes/v1.status'
+import { Route as V1SendRouteImport } from './routes/v1.send'
+import { Route as V1OtpRouteImport } from './routes/v1.otp'
+import { Route as V1BulkRouteImport } from './routes/v1.bulk'
+import { Route as V1WebhookSessionIdRouteImport } from './routes/v1.webhook.$sessionId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const V1StatusRoute = V1StatusRouteImport.update({
+  id: '/v1/status',
+  path: '/v1/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1SendRoute = V1SendRouteImport.update({
+  id: '/v1/send',
+  path: '/v1/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1OtpRoute = V1OtpRouteImport.update({
+  id: '/v1/otp',
+  path: '/v1/otp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1BulkRoute = V1BulkRouteImport.update({
+  id: '/v1/bulk',
+  path: '/v1/bulk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const V1WebhookSessionIdRoute = V1WebhookSessionIdRouteImport.update({
+  id: '/v1/webhook/$sessionId',
+  path: '/v1/webhook/$sessionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/v1/bulk': typeof V1BulkRoute
+  '/v1/otp': typeof V1OtpRoute
+  '/v1/send': typeof V1SendRoute
+  '/v1/status': typeof V1StatusRoute
+  '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/v1/bulk': typeof V1BulkRoute
+  '/v1/otp': typeof V1OtpRoute
+  '/v1/send': typeof V1SendRoute
+  '/v1/status': typeof V1StatusRoute
+  '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/v1/bulk': typeof V1BulkRoute
+  '/v1/otp': typeof V1OtpRoute
+  '/v1/send': typeof V1SendRoute
+  '/v1/status': typeof V1StatusRoute
+  '/v1/webhook/$sessionId': typeof V1WebhookSessionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/v1/bulk'
+    | '/v1/otp'
+    | '/v1/send'
+    | '/v1/status'
+    | '/v1/webhook/$sessionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/v1/bulk'
+    | '/v1/otp'
+    | '/v1/send'
+    | '/v1/status'
+    | '/v1/webhook/$sessionId'
+  id:
+    | '__root__'
+    | '/'
+    | '/v1/bulk'
+    | '/v1/otp'
+    | '/v1/send'
+    | '/v1/status'
+    | '/v1/webhook/$sessionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  V1BulkRoute: typeof V1BulkRoute
+  V1OtpRoute: typeof V1OtpRoute
+  V1SendRoute: typeof V1SendRoute
+  V1StatusRoute: typeof V1StatusRoute
+  V1WebhookSessionIdRoute: typeof V1WebhookSessionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,12 +117,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/v1/status': {
+      id: '/v1/status'
+      path: '/v1/status'
+      fullPath: '/v1/status'
+      preLoaderRoute: typeof V1StatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/send': {
+      id: '/v1/send'
+      path: '/v1/send'
+      fullPath: '/v1/send'
+      preLoaderRoute: typeof V1SendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/otp': {
+      id: '/v1/otp'
+      path: '/v1/otp'
+      fullPath: '/v1/otp'
+      preLoaderRoute: typeof V1OtpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/bulk': {
+      id: '/v1/bulk'
+      path: '/v1/bulk'
+      fullPath: '/v1/bulk'
+      preLoaderRoute: typeof V1BulkRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/v1/webhook/$sessionId': {
+      id: '/v1/webhook/$sessionId'
+      path: '/v1/webhook/$sessionId'
+      fullPath: '/v1/webhook/$sessionId'
+      preLoaderRoute: typeof V1WebhookSessionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  V1BulkRoute: V1BulkRoute,
+  V1OtpRoute: V1OtpRoute,
+  V1SendRoute: V1SendRoute,
+  V1StatusRoute: V1StatusRoute,
+  V1WebhookSessionIdRoute: V1WebhookSessionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
