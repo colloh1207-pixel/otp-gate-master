@@ -401,7 +401,7 @@ export const playgroundCall = createServerFn({ method: "POST" })
     return {
       status: up.status,
       ok: up.ok,
-      data: JSON.parse(JSON.stringify(up.data ?? null)) as Record<string, unknown> | null,
+      data_json: JSON.stringify(up.data ?? null),
       error: up.error,
       durationMs: up.durationMs,
     };
