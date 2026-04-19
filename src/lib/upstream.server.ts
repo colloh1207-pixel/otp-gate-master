@@ -42,13 +42,27 @@ export async function upstreamFetch<T = unknown>(
     } catch {
       data = text as unknown;
     }
+    // Upstream wraps responses as { success, data } | { success: false, error }
+    let unwrapped: unknown = data;
+    let upstreamError: string | null = null;
+    if (data && typeof data === "object" && "success" in (data as Record<string, unknown>)) {
+      const obj = data as { success?: boolean; data?: unknown; error?: unknown };
+      if (obj.success === false) {
+        upstreamError = typeof obj.error === "string" ? obj.error : "Upstream error";
+      }
+      unwrapped = obj.data ?? null;
+    }
+    const ok = res.ok && upstreamError === null;
     return {
-      ok: res.ok,
+      ok,
       status: res.status,
-      data: data as T,
-      error: res.ok ? null : (typeof data === "object" && data && "error" in data
-        ? String((data as { error: unknown }).error)
-        : `Upstream error ${res.status}`),
+      data: unwrapped as T,
+      error: ok
+        ? null
+        : upstreamError ??
+          (typeof data === "object" && data && "error" in data
+            ? String((data as { error: unknown }).error)
+            : `Upstream error ${res.status}`),
       durationMs: Date.now() - start,
     };
   } catch (err) {
