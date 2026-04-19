@@ -15,6 +15,14 @@ import { z } from "zod";
 
 const idSchema = z.string().uuid();
 
+function normalizeSessionStatus(status: string | null | undefined) {
+  const value = (status ?? "unknown").toLowerCase();
+  if (value === "qr") return "awaiting_qr";
+  if (value === "open") return "connected";
+  if (value === "close") return "disconnected";
+  return value;
+}
+
 // ============= SESSIONS =============
 
 export const createSession = createServerFn({ method: "POST" })
@@ -124,17 +132,18 @@ export const getSessionStatus = createServerFn({ method: "POST" })
     const up = await upstreamFetch<{ status?: string; phone_number?: string }>(
       `/api/sessions/${sess.upstream_session_id}/status`,
     );
+    const normalizedStatus = normalizeSessionStatus(up.data?.status);
     if (up.ok && up.data?.status) {
       await supabaseAdmin
         .from("sessions")
         .update({
-          status: up.data.status,
+          status: normalizedStatus,
           phone_number: up.data.phone_number ?? undefined,
-          last_connected_at: up.data.status === "connected" ? new Date().toISOString() : undefined,
+          last_connected_at: normalizedStatus === "connected" ? new Date().toISOString() : undefined,
         })
         .eq("id", data.id);
     }
-    return { status: up.data?.status ?? "unknown", phone_number: up.data?.phone_number ?? null };
+    return { status: normalizedStatus, phone_number: up.data?.phone_number ?? null };
   });
 
 export const requestPairing = createServerFn({ method: "POST" })
