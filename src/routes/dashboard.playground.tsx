@@ -47,7 +47,13 @@ function PlaygroundPage() {
     setBusy(true); setResp(null);
     try {
       const r = await playgroundCall({ data: { sessionId, endpoint, body: parsed } });
-      setResp({ status: r.status, ok: r.ok, data: r.data_json, durationMs: r.durationMs, error: r.error });
+      setResp({
+        status: r.status,
+        ok: r.ok,
+        data: typeof r.data === "string" ? r.data : JSON.stringify(r.data ?? null, null, 2),
+        durationMs: r.duration_ms,
+        error: r.error,
+      });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
     } finally { setBusy(false); }
