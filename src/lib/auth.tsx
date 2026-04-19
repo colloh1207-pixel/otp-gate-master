@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { registerPWA } from "@/lib/pwa";
@@ -61,6 +61,7 @@ const Ctx = createContext<AuthCtx>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const bootstrappedRef = useRef(false);
 
   useEffect(() => {
     patchFetchWithAuth();
@@ -68,10 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let cancelled = false;
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, sess) => {
       if (cancelled) return;
       setSession(sess);
-      setLoading(false);
+      if (bootstrappedRef.current || event !== "INITIAL_SESSION") {
+        setLoading(false);
+      }
     });
 
     (async () => {
@@ -82,7 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const url = new URL(window.location.href);
           const code = url.searchParams.get("code");
           if (code) {
-            await supabase.auth.exchangeCodeForSession(window.location.href);
+            const { error } = await supabase.auth.exchangeCodeForSession(code);
+            if (error) throw error;
             url.searchParams.delete("code");
             url.searchParams.delete("state");
             window.history.replaceState({}, "", url.toString());
@@ -94,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { data } = await supabase.auth.getSession();
       if (cancelled) return;
+      bootstrappedRef.current = true;
       setSession(data.session);
       setLoading(false);
     })();
