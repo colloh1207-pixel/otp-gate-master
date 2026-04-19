@@ -65,15 +65,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     patchFetchWithAuth();
     registerPWA();
+
+    let cancelled = false;
+
     const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
+      if (cancelled) return;
       setSession(sess);
       setLoading(false);
     });
-    supabase.auth.getSession().then(({ data }) => {
+
+    (async () => {
+      // If the URL contains a PKCE ?code= from email verification or OAuth,
+      // exchange it for a session before resolving loading.
+      try {
+        if (typeof window !== "undefined") {
+          const url = new URL(window.location.href);
+          const code = url.searchParams.get("code");
+          if (code) {
+            await supabase.auth.exchangeCodeForSession(window.location.href);
+            url.searchParams.delete("code");
+            url.searchParams.delete("state");
+            window.history.replaceState({}, "", url.toString());
+          }
+        }
+      } catch (err) {
+        console.error("[auth] exchangeCodeForSession failed", err);
+      }
+
+      const { data } = await supabase.auth.getSession();
+      if (cancelled) return;
       setSession(data.session);
       setLoading(false);
-    });
-    return () => sub.subscription.unsubscribe();
+    })();
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   return (
