@@ -40,6 +40,7 @@ function SessionsList() {
     setBusy(true);
     try {
       const result = await createSession({ data: { name: name.trim() } });
+      if (!result.session?.id) throw new Error("Session created but no session id was returned");
       setName("");
       setOpen(false);
       toast.success("Session created — scan the QR code next");
