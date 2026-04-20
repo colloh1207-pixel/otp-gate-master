@@ -25,7 +25,13 @@ function SessionsList() {
     const r = await listSessions();
     setSessions(r.sessions as never);
   }
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    const interval = window.setInterval(() => {
+      void load();
+    }, 5000);
+    return () => window.clearInterval(interval);
+  }, []);
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault();
