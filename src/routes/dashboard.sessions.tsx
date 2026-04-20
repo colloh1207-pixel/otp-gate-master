@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Plus, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { listSessions, createSession } from "@/server/dashboard.functions";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/dashboard/sessions")({ component: Session
 type Session = { id: string; name: string; status: string; phone_number: string | null; created_at: string };
 
 function SessionsList() {
+  const nav = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -38,9 +39,12 @@ function SessionsList() {
     if (!name.trim()) return;
     setBusy(true);
     try {
-      await createSession({ data: { name: name.trim() } });
-      setName(""); setOpen(false); await load();
-      toast.success("Session created — connect your number next");
+      const result = await createSession({ data: { name: name.trim() } });
+      if (!result.session?.id) throw new Error("Session created but no session id was returned");
+      setName("");
+      setOpen(false);
+      toast.success("Session created — scan the QR code next");
+      nav({ to: "/dashboard/sessions/$id", params: { id: result.session.id } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed");
     } finally { setBusy(false); }
