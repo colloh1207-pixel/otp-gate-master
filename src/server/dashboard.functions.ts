@@ -217,15 +217,30 @@ async function loadOwnedSession(userId: string, sessionId: string) {
   return synced;
 }
 
+async function refreshSessionRouteTarget(session: SessionRow) {
+  const [synced] = await syncSessionRows([session]);
+  return synced;
+}
+
 export const getSessionQr = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => ({ id: idSchema.parse(input.id) }))
   .handler(async ({ data, context }) => {
     const sess = await loadOwnedSession(context.userId, data.id);
     if (!sess.upstream_session_id) return { qr: null, status: sess.status, ok: true };
-    const up = await upstreamFetch<{ qr?: string; status?: string }>(
-      `/api/sessions/${sess.upstream_session_id}/qr`,
+    let target = sess;
+    let up = await upstreamFetch<{ qr?: string; status?: string }>(
+      `/api/sessions/${target.upstream_session_id}/qr`,
     );
+    if (!up.ok && up.status === 404) {
+      const refreshed = await refreshSessionRouteTarget(sess);
+      if (refreshed.upstream_session_id && refreshed.upstream_session_id !== sess.upstream_session_id) {
+        target = refreshed;
+        up = await upstreamFetch<{ qr?: string; status?: string }>(
+          `/api/sessions/${target.upstream_session_id}/qr`,
+        );
+      }
+    }
     if (!up.ok && up.status === 404) {
       await supabaseAdmin.from("sessions").update({ status: "disconnected" }).eq("id", data.id);
       return { qr: null, status: "disconnected", ok: false };
@@ -243,16 +258,26 @@ export const getSessionStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const sess = await loadOwnedSession(context.userId, data.id);
     if (!sess.upstream_session_id) return { status: "pending", phone_number: null };
-    const up = await upstreamFetch<{ status?: string; phone_number?: string }>(
-      `/api/sessions/${sess.upstream_session_id}/status`,
+    let target = sess;
+    let up = await upstreamFetch<{ status?: string; phone_number?: string; has_qr?: boolean }>(
+      `/api/sessions/${target.upstream_session_id}/status`,
     );
     if (!up.ok && up.status === 404) {
+      const refreshed = await refreshSessionRouteTarget(sess);
+      if (refreshed.upstream_session_id && refreshed.upstream_session_id !== sess.upstream_session_id) {
+        target = refreshed;
+        up = await upstreamFetch<{ status?: string; phone_number?: string; has_qr?: boolean }>(
+          `/api/sessions/${target.upstream_session_id}/status`,
+        );
+      }
+    }
+    if (!up.ok && up.status === 404) {
       await supabaseAdmin.from("sessions").update({ status: "disconnected" }).eq("id", data.id);
-      return { status: "disconnected", phone_number: sess.phone_number ?? null };
+      return { status: "disconnected", phone_number: target.phone_number ?? null };
     }
     const normalizedStatus = up.ok
-      ? normalizeSessionStatus(up.data?.status)
-      : sess.status;
+      ? normalizeSessionStatus(up.data?.status, Boolean(up.data?.has_qr))
+      : target.status;
     if (up.ok && up.data?.status) {
       await supabaseAdmin
         .from("sessions")
@@ -263,7 +288,7 @@ export const getSessionStatus = createServerFn({ method: "POST" })
         })
         .eq("id", data.id);
     }
-    return { status: normalizedStatus, phone_number: up.data?.phone_number ?? sess.phone_number ?? null };
+    return { status: normalizedStatus, phone_number: up.data?.phone_number ?? target.phone_number ?? null };
   });
 
 export const requestPairing = createServerFn({ method: "POST" })
