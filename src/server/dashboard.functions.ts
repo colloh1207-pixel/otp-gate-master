@@ -15,12 +15,116 @@ import { z } from "zod";
 
 const idSchema = z.string().uuid();
 
-function normalizeSessionStatus(status: string | null | undefined) {
+type SessionRow = {
+  id: string;
+  name: string;
+  phone_number: string | null;
+  status: string;
+  last_connected_at: string | null;
+  created_at: string;
+  updated_at: string;
+  upstream_session_id: string | null;
+  upstream_token: string | null;
+};
+
+type ClientSession = Pick<
+  SessionRow,
+  "id" | "name" | "phone_number" | "status" | "last_connected_at" | "created_at"
+>;
+
+type UpstreamSession = {
+  id?: string;
+  session_id?: string;
+  token?: string;
+  status?: string;
+  live_status?: string | null;
+  phone_number?: string | null;
+  name?: string | null;
+  connected_at?: number | null;
+  has_qr?: boolean;
+};
+
+function normalizeSessionStatus(status: string | null | undefined, hasQr = false) {
   const value = (status ?? "unknown").toLowerCase();
-  if (value === "qr") return "awaiting_qr";
-  if (value === "open") return "connected";
-  if (value === "close") return "disconnected";
+  if (value === "qr" || (value === "pending" && hasQr)) return "awaiting_qr";
+  if (value === "open" || value === "connected") return "connected";
+  if (value === "close" || value === "closed" || value === "disconnected") return "disconnected";
   return value;
+}
+
+function getUpstreamSessionId(session: UpstreamSession) {
+  return session.session_id ?? session.id ?? null;
+}
+
+function unixSecondsToIso(value: number | null | undefined) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? new Date(value * 1000).toISOString()
+    : undefined;
+}
+
+function toClientSession(session: SessionRow): ClientSession {
+  return {
+    id: session.id,
+    name: session.name,
+    phone_number: session.phone_number,
+    status: session.status,
+    last_connected_at: session.last_connected_at,
+    created_at: session.created_at,
+  };
+}
+
+async function fetchUpstreamSessions() {
+  const up = await upstreamFetch<UpstreamSession[]>("/api/sessions");
+  return up.ok && Array.isArray(up.data) ? up.data : [];
+}
+
+function matchUpstreamSession(row: SessionRow, upstreamSessions: UpstreamSession[]) {
+  const byId = upstreamSessions.find((session) => getUpstreamSessionId(session) === row.upstream_session_id);
+  if (byId) return byId;
+
+  const byToken = upstreamSessions.find((session) => session.token && session.token === row.upstream_token);
+  if (byToken) return byToken;
+
+  const nameMatches = upstreamSessions.filter(
+    (session) => session.name?.trim().toLowerCase() === row.name.trim().toLowerCase(),
+  );
+  return nameMatches.length === 1 ? nameMatches[0] : null;
+}
+
+async function syncSessionRows(rows: SessionRow[]) {
+  if (rows.length === 0) return rows;
+
+  const upstreamSessions = await fetchUpstreamSessions();
+
+  return Promise.all(rows.map(async (row) => {
+    const matched = matchUpstreamSession(row, upstreamSessions);
+    const rowAgeMs = Date.now() - new Date(row.updated_at ?? row.created_at).getTime();
+    const nextStatus = matched
+      ? normalizeSessionStatus(matched.status ?? matched.live_status, matched.has_qr)
+      : rowAgeMs > 60_000 && row.status !== "logged_out"
+        ? "disconnected"
+        : row.status;
+
+    const updates: Partial<SessionRow> = {};
+    const nextUpstreamSessionId = matched ? (getUpstreamSessionId(matched) ?? row.upstream_session_id) : row.upstream_session_id;
+    const nextUpstreamToken = matched?.token ?? row.upstream_token;
+    const nextPhoneNumber = matched && typeof matched.phone_number !== "undefined" ? matched.phone_number : row.phone_number;
+    const nextLastConnectedAt = matched && nextStatus === "connected"
+      ? (unixSecondsToIso(matched.connected_at) ?? row.last_connected_at)
+      : row.last_connected_at;
+
+    if (nextUpstreamSessionId !== row.upstream_session_id) updates.upstream_session_id = nextUpstreamSessionId;
+    if (nextUpstreamToken !== row.upstream_token) updates.upstream_token = nextUpstreamToken;
+    if (nextStatus !== row.status) updates.status = nextStatus;
+    if (nextPhoneNumber !== row.phone_number) updates.phone_number = nextPhoneNumber;
+    if (nextLastConnectedAt !== row.last_connected_at) updates.last_connected_at = nextLastConnectedAt;
+
+    if (Object.keys(updates).length > 0) {
+      await supabaseAdmin.from("sessions").update(updates).eq("id", row.id);
+    }
+
+    return { ...row, ...updates };
+  }));
 }
 
 // ============= SESSIONS =============
@@ -76,11 +180,12 @@ export const listSessions = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data, error } = await supabaseAdmin
       .from("sessions")
-      .select("id, name, phone_number, status, last_connected_at, created_at")
+      .select("id, name, phone_number, status, last_connected_at, created_at, updated_at, upstream_session_id, upstream_token")
       .eq("user_id", context.userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return { sessions: data ?? [] };
+    const synced = await syncSessionRows((data ?? []) as SessionRow[]);
+    return { sessions: synced.map(toClientSession) };
   });
 
 export const getSession = createServerFn({ method: "POST" })
@@ -89,26 +194,27 @@ export const getSession = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await supabaseAdmin
       .from("sessions")
-      .select("id, name, phone_number, status, last_connected_at, created_at, upstream_session_id")
+      .select("id, name, phone_number, status, last_connected_at, created_at, updated_at, upstream_session_id, upstream_token")
       .eq("id", data.id)
       .eq("user_id", context.userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!row) throw new Error("Session not found");
-    // Don't leak upstream_session_id to client beyond opaque purposes
-    return { session: { ...row, upstream_session_id: undefined } };
+    const [synced] = await syncSessionRows([row as SessionRow]);
+    return { session: toClientSession(synced) };
   });
 
 async function loadOwnedSession(userId: string, sessionId: string) {
   const { data, error } = await supabaseAdmin
     .from("sessions")
-    .select("id, upstream_session_id, upstream_token")
+    .select("id, name, phone_number, status, last_connected_at, created_at, updated_at, upstream_session_id, upstream_token")
     .eq("id", sessionId)
     .eq("user_id", userId)
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Session not found");
-  return data;
+  const [synced] = await syncSessionRows([data as SessionRow]);
+  return synced;
 }
 
 export const getSessionQr = createServerFn({ method: "POST" })
@@ -116,11 +222,19 @@ export const getSessionQr = createServerFn({ method: "POST" })
   .inputValidator((input: { id: string }) => ({ id: idSchema.parse(input.id) }))
   .handler(async ({ data, context }) => {
     const sess = await loadOwnedSession(context.userId, data.id);
-    if (!sess.upstream_session_id) return { qr: null, status: "pending" };
+    if (!sess.upstream_session_id) return { qr: null, status: sess.status, ok: true };
     const up = await upstreamFetch<{ qr?: string; status?: string }>(
       `/api/sessions/${sess.upstream_session_id}/qr`,
     );
-    return { qr: up.data?.qr ?? null, status: up.data?.status ?? null, ok: up.ok };
+    if (!up.ok && up.status === 404) {
+      await supabaseAdmin.from("sessions").update({ status: "disconnected" }).eq("id", data.id);
+      return { qr: null, status: "disconnected", ok: false };
+    }
+    return {
+      qr: up.data?.qr ?? null,
+      status: normalizeSessionStatus(up.data?.status, Boolean(up.data?.qr)),
+      ok: up.ok,
+    };
   });
 
 export const getSessionStatus = createServerFn({ method: "POST" })
@@ -132,7 +246,13 @@ export const getSessionStatus = createServerFn({ method: "POST" })
     const up = await upstreamFetch<{ status?: string; phone_number?: string }>(
       `/api/sessions/${sess.upstream_session_id}/status`,
     );
-    const normalizedStatus = normalizeSessionStatus(up.data?.status);
+    if (!up.ok && up.status === 404) {
+      await supabaseAdmin.from("sessions").update({ status: "disconnected" }).eq("id", data.id);
+      return { status: "disconnected", phone_number: sess.phone_number ?? null };
+    }
+    const normalizedStatus = up.ok
+      ? normalizeSessionStatus(up.data?.status)
+      : sess.status;
     if (up.ok && up.data?.status) {
       await supabaseAdmin
         .from("sessions")
@@ -143,7 +263,7 @@ export const getSessionStatus = createServerFn({ method: "POST" })
         })
         .eq("id", data.id);
     }
-    return { status: normalizedStatus, phone_number: up.data?.phone_number ?? null };
+    return { status: normalizedStatus, phone_number: up.data?.phone_number ?? sess.phone_number ?? null };
   });
 
 export const requestPairing = createServerFn({ method: "POST" })
